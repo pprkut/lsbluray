@@ -16,7 +16,7 @@
 
 extern char *program_name;
 
-extern int opt_t;
+extern int opt_d, opt_t;
 
 struct bd_info {
     const BLURAY_DISC_INFO *generic;
@@ -35,7 +35,24 @@ struct bd_info {
             int ig_count;
             int sec_video_count;
             int sec_audio_count;
-        } * clips;
+            struct {
+                const char *format;
+                const char *aspect_ratio;
+                const char *resolution;
+                const char *fps;
+            } *video_streams;
+            struct {
+                const char *format;
+                const char *samplerate;
+                const char *channels;
+                const char *language_code;
+                const char *language_name;
+            } *audio_streams;
+            struct {
+                const char *language_code;
+                const char *language_name;
+            } *subtitle_streams;
+        } *clips;
     } *titles;
 };
 

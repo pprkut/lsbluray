@@ -8,6 +8,9 @@ project (lsbluray VERSION "${LSBLURAY_VERSION_MAJOR}.${LSBLURAY_VERSION_MINOR}.$
 
 set(CMAKE_MODULE_PATH ${lsbluray_SOURCE_DIR}/cmake/modules)
 
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
 find_package(Bluray REQUIRED)
 
 configure_file(src/version.h.in version.h)

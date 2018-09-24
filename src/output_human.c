@@ -75,5 +75,50 @@ void print_human_readable(struct bd_info *bd_info)
         printf(", Clips: %02i", bd_info->titles[i].clip_count);
         printf(", Angles: %02i", bd_info->titles[i].angle_count);
         printf(", Marks: %02i\n", bd_info->titles[i].mark_count);
+
+        if (bd_info->titles[i].clips)
+        {
+            for (int j=0; j < bd_info->titles[i].clip_count; j++)
+            {
+                printf("\tClip: %02i", j+1);
+                printf(", Video streams: %02i", bd_info->titles[i].clips[j].video_count);
+                printf(", Audio streams: %02i", bd_info->titles[i].clips[j].audio_count);
+                printf(", PG subtitle streams: %02i", bd_info->titles[i].clips[j].pg_count);
+                printf(", IG menu streams: %02i\n", bd_info->titles[i].clips[j].ig_count);
+
+                if (bd_info->titles[i].clips[j].video_streams)
+                {
+                    for (int k=0; k < bd_info->titles[i].clips[j].video_count; k++)
+                    {
+                        printf("\t\tVideo: %02i", k+1);
+                        printf(", Format: %s", bd_info->titles[i].clips[j].video_streams[k].format);
+                        printf(", Resolution: %s", bd_info->titles[i].clips[j].video_streams[k].resolution);
+                        printf(", Aspect Ratio: %s", bd_info->titles[i].clips[j].video_streams[k].aspect_ratio);
+                        printf(", FPS: %s\n", bd_info->titles[i].clips[j].video_streams[k].fps);
+                    }
+                }
+
+                if (bd_info->titles[i].clips[j].audio_streams)
+                {
+                    for (int k=0; k < bd_info->titles[i].clips[j].audio_count; k++)
+                    {
+                        printf("\t\tAudio: %02i", k+1);
+                        printf(", Language: %s - %s", bd_info->titles[i].clips[j].audio_streams[k].language_code, bd_info->titles[i].clips[j].audio_streams[k].language_name);
+                        printf(", Format: %s", bd_info->titles[i].clips[j].audio_streams[k].format);
+                        printf(", Frequency: %s", bd_info->titles[i].clips[j].audio_streams[k].samplerate);
+                        printf(", Channels: %s\n", bd_info->titles[i].clips[j].audio_streams[k].channels);
+                    }
+                }
+
+                if (bd_info->titles[i].clips[j].subtitle_streams)
+                {
+                    for (int k=0; k < bd_info->titles[i].clips[j].pg_count; k++)
+                    {
+                        printf("\t\tSubtitle: %02i", k+1);
+                        printf(", Language: %s - %s\n", bd_info->titles[i].clips[j].subtitle_streams[k].language_code, bd_info->titles[i].clips[j].subtitle_streams[k].language_name);
+                    }
+                }
+            }
+        }
     }
 }
