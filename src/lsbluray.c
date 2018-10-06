@@ -146,6 +146,16 @@ static char* get_language_name(const char* code)
     return language[i].name;
 }
 
+static time_t get_seconds(uint64_t duration)
+{
+    return (int) duration / 90000;
+}
+
+static suseconds_t get_usceconds(uint64_t duration)
+{
+    return (int) ((duration / 90000.0 - get_seconds(duration)) * 1000000);
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -226,8 +236,8 @@ int main(int argc, char *argv[])
 
         BLURAY_TITLE_INFO *title_info = bd_get_title_info(bd, i, 0);
 
-        bd_info.titles[i].duration.tv_sec  = (int) title_info->duration / 90000;
-        bd_info.titles[i].duration.tv_usec = (int) ((title_info->duration / 90000.0 - bd_info.titles[i].duration.tv_sec) * 1000000);
+        bd_info.titles[i].duration.tv_sec  = get_seconds(title_info->duration);
+        bd_info.titles[i].duration.tv_usec = get_usceconds(title_info->duration);
 
         bd_info.titles[i].chapter_count = title_info->chapter_count;
         bd_info.titles[i].clip_count    = title_info->clip_count;
@@ -246,6 +256,9 @@ int main(int argc, char *argv[])
                 bd_info.titles[i].clips[j].ig_count        = title_info->clips[j].ig_stream_count;
                 bd_info.titles[i].clips[j].sec_video_count = title_info->clips[j].sec_video_stream_count;
                 bd_info.titles[i].clips[j].sec_audio_count = title_info->clips[j].sec_audio_stream_count;
+
+                bd_info.titles[i].clips[j].duration.tv_sec  = get_seconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
+                bd_info.titles[i].clips[j].duration.tv_usec = get_usceconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
 
                 bd_info.titles[i].clips[j].video_streams = calloc(bd_info.titles[i].clips[j].video_count, sizeof(*bd_info.titles[i].clips[j].video_streams));
                 bd_info.titles[i].clips[j].audio_streams = calloc(bd_info.titles[i].clips[j].audio_count, sizeof(*bd_info.titles[i].clips[j].audio_streams));

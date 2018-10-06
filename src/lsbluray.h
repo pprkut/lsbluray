@@ -35,6 +35,7 @@ struct bd_info {
             int ig_count;
             int sec_video_count;
             int sec_audio_count;
+            struct timeval duration;
             struct {
                 const char *format;
                 const char *aspect_ratio;

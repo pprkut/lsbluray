@@ -52,6 +52,10 @@ void print_human_readable(struct bd_info *bd_info)
     printf("Disc Name: %s\n", bd_info->generic->disc_name);
     printf("Disc Volume ID: %s\n", bd_info->generic->udf_volume_id);
 
+    struct duration length;
+    struct duration clip_length;
+    char usec[7];
+
     for (int i=0; i < bd_info->title_count; i++)
     {
         if (opt_t != i+1 && opt_t != 0)
@@ -59,14 +63,11 @@ void print_human_readable(struct bd_info *bd_info)
             continue;
         }
 
-        struct duration length;
-
         length.hours   = bd_info->titles[i].duration.tv_sec / 60 / 60;
         length.minutes = bd_info->titles[i].duration.tv_sec / 60 % 60;
         length.seconds = bd_info->titles[i].duration.tv_sec % 60;
         length.microseconds = bd_info->titles[i].duration.tv_usec;
 
-        char usec[7];
         snprintf(usec, 7, "%lu", bd_info->titles[i].duration.tv_usec);
 
         printf("Title: %02i", i+1);
@@ -80,7 +81,15 @@ void print_human_readable(struct bd_info *bd_info)
         {
             for (int j=0; j < bd_info->titles[i].clip_count; j++)
             {
+                clip_length.hours   = bd_info->titles[i].clips[j].duration.tv_sec / 60 / 60;
+                clip_length.minutes = bd_info->titles[i].clips[j].duration.tv_sec / 60 % 60;
+                clip_length.seconds = bd_info->titles[i].clips[j].duration.tv_sec % 60;
+                clip_length.microseconds = bd_info->titles[i].clips[j].duration.tv_usec;
+
+                snprintf(usec, 7, "%lu", bd_info->titles[i].clips[j].duration.tv_usec);
+
                 printf("\tClip: %02i", j+1);
+                printf(", Length: %02i:%02i:%02i.%.3s", clip_length.hours, clip_length.minutes, clip_length.seconds, usec);
                 printf(", Video streams: %02i", bd_info->titles[i].clips[j].video_count);
                 printf(", Audio streams: %02i", bd_info->titles[i].clips[j].audio_count);
                 printf(", PG subtitle streams: %02i", bd_info->titles[i].clips[j].pg_count);
