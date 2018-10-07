@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_t = 0, opt_d = 0;
+int opt_c = 0, opt_d = 0, opt_t = 0;
 
 static void version(void)
 {
@@ -127,6 +127,7 @@ static void usage(void)
     printf("Usage: %s [options] [-t track_number] [bluray path] \n", program_name);
     printf("\n");
     printf("Options:\n");
+    printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
     printf("\n");
     printf("\tOther options:\n");
@@ -166,7 +167,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:d")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:dc")) != EOF)
     {
         switch (c)
         {
@@ -177,6 +178,9 @@ int main(int argc, char *argv[])
             case 'V':
                 version();
                 return 0;
+            case 'c':
+                opt_c = 1;
+                break;
             case 'd':
                 opt_d = 1;
                 break;
@@ -432,6 +436,19 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (opt_c == 1)
+        {
+            bd_info.titles[i].chapters = calloc(bd_info.titles[i].chapter_count, sizeof(*bd_info.titles[i].chapters));
+
+            for (int j=0; j < bd_info.titles[i].chapter_count; j++)
+            {
+                bd_info.titles[i].chapters[j].duration.tv_sec  = get_seconds(title_info->chapters[j].duration);
+                bd_info.titles[i].chapters[j].duration.tv_usec = get_usceconds(title_info->chapters[j].duration);
+
+                bd_info.titles[i].chapters[j].clip = title_info->chapters[j].clip_ref;
+            }
+        }
+
         bd_free_title_info(title_info);
     }
 
@@ -468,6 +485,11 @@ int main(int argc, char *argv[])
             }
 
             free(bd_info.titles[i].clips);
+        }
+
+        if (bd_info.titles[i].chapters)
+        {
+            free(bd_info.titles[i].chapters);
         }
     }
 

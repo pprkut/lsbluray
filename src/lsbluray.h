@@ -16,7 +16,7 @@
 
 extern char *program_name;
 
-extern int opt_d, opt_t;
+extern int opt_c, opt_d, opt_t;
 
 struct bd_info {
     const BLURAY_DISC_INFO *generic;
@@ -54,6 +54,11 @@ struct bd_info {
                 const char *language_name;
             } *subtitle_streams;
         } *clips;
+
+        struct {
+            struct timeval duration;
+            unsigned int clip;
+        } *chapters;
     } *titles;
 };
 
