@@ -67,7 +67,7 @@ void print_human_readable(struct bd_info *bd_info)
         length.seconds = bd_info->titles[i].duration.tv_sec % 60;
         length.microseconds = bd_info->titles[i].duration.tv_usec;
 
-        snprintf(usec, 7, "%lu", bd_info->titles[i].duration.tv_usec);
+        snprintf(usec, 7, "%06lu", bd_info->titles[i].duration.tv_usec);
 
         printf("Title: %02i", i+1);
         printf(", Length: %02i:%02i:%02i.%.3s", length.hours, length.minutes, length.seconds, usec);
@@ -85,7 +85,7 @@ void print_human_readable(struct bd_info *bd_info)
                 length.seconds = bd_info->titles[i].chapters[j].duration.tv_sec % 60;
                 length.microseconds = bd_info->titles[i].chapters[j].duration.tv_usec;
 
-                snprintf(usec, 7, "%lu", bd_info->titles[i].chapters[j].duration.tv_usec);
+                snprintf(usec, 7, "%06lu", bd_info->titles[i].chapters[j].duration.tv_usec);
 
                 printf("\tChapter: %02i", j+1);
                 printf(", Length: %02i:%02i:%02i.%.3s", length.hours, length.minutes, length.seconds, usec);
@@ -102,7 +102,7 @@ void print_human_readable(struct bd_info *bd_info)
                 length.seconds = bd_info->titles[i].clips[j].duration.tv_sec % 60;
                 length.microseconds = bd_info->titles[i].clips[j].duration.tv_usec;
 
-                snprintf(usec, 7, "%lu", bd_info->titles[i].clips[j].duration.tv_usec);
+                snprintf(usec, 7, "%06lu", bd_info->titles[i].clips[j].duration.tv_usec);
 
                 printf("\tClip: %02i", j+1);
                 printf(", Length: %02i:%02i:%02i.%.3s", length.hours, length.minutes, length.seconds, usec);
