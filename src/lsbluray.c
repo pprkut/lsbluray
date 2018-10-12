@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_c = 0, opt_d = 0, opt_t = 0;
+int opt_c = 0, opt_d = 0, opt_t = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -129,6 +129,7 @@ static void usage(void)
     printf("Options:\n");
     printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
+    printf("\t  -x all information\n");
     printf("\n");
     printf("\tOther options:\n");
     printf("\t  -h this message\n");
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:dc")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:dcx")) != EOF)
     {
         switch (c)
         {
@@ -186,6 +187,11 @@ int main(int argc, char *argv[])
                 break;
             case 't':
                 opt_t = atoi(optarg);
+                break;
+            case 'x':
+                opt_x = 1;
+                opt_c = 1;
+                opt_d = 1;
                 break;
         }
     }
