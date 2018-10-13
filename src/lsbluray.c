@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_a = 0, opt_c = 0, opt_d = 0, opt_t = 0, opt_v = 0, opt_x = 0;
+int opt_a = 0, opt_c = 0, opt_d = 0, opt_s = 0, opt_t = 0, opt_v = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -130,6 +130,7 @@ static void usage(void)
     printf("\t  -a audio streams (implies -d)\n");
     printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
+    printf("\t  -s subtitle streams (implies -d)\n");
     printf("\t  -v video streams (implies -d)\n");
     printf("\t  -x all information\n");
     printf("\n");
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:acdvx")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:acdsvx")) != EOF)
     {
         switch (c)
         {
@@ -191,6 +192,10 @@ int main(int argc, char *argv[])
             case 'd':
                 opt_d = 1;
                 break;
+            case 's':
+                opt_d = 1;
+                opt_s = 1;
+                break;
             case 't':
                 opt_t = atoi(optarg);
                 break;
@@ -203,6 +208,7 @@ int main(int argc, char *argv[])
                 opt_a = 1;
                 opt_c = 1;
                 opt_d = 1;
+                opt_s = 1;
                 opt_v = 1;
                 break;
         }
@@ -281,8 +287,6 @@ int main(int argc, char *argv[])
 
                 bd_info.titles[i].clips[j].duration.tv_sec  = get_seconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
                 bd_info.titles[i].clips[j].duration.tv_usec = get_usceconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
-
-                bd_info.titles[i].clips[j].subtitle_streams = calloc(bd_info.titles[i].clips[j].pg_count, sizeof(*bd_info.titles[i].clips[j].subtitle_streams));
 
                 if (opt_v == 1)
                 {
@@ -454,10 +458,15 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                for (int k=0; k < bd_info.titles[i].clips[j].pg_count; k++)
+                if (opt_s == 1)
                 {
-                    bd_info.titles[i].clips[j].subtitle_streams[k].language_code = strdup((char *) title_info->clips[j].pg_streams[k].lang);
-                    bd_info.titles[i].clips[j].subtitle_streams[k].language_name = get_language_name(bd_info.titles[i].clips[j].subtitle_streams[k].language_code);
+                    bd_info.titles[i].clips[j].subtitle_streams = calloc(bd_info.titles[i].clips[j].pg_count, sizeof(*bd_info.titles[i].clips[j].subtitle_streams));
+
+                    for (int k=0; k < bd_info.titles[i].clips[j].pg_count; k++)
+                    {
+                        bd_info.titles[i].clips[j].subtitle_streams[k].language_code = strdup((char *) title_info->clips[j].pg_streams[k].lang);
+                        bd_info.titles[i].clips[j].subtitle_streams[k].language_name = get_language_name(bd_info.titles[i].clips[j].subtitle_streams[k].language_code);
+                    }
                 }
             }
         }
