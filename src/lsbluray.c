@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_a = 0, opt_c = 0, opt_d = 0, opt_t = 0, opt_x = 0;
+int opt_a = 0, opt_c = 0, opt_d = 0, opt_t = 0, opt_v = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -130,6 +130,7 @@ static void usage(void)
     printf("\t  -a audio streams (implies -d)\n");
     printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
+    printf("\t  -v video streams (implies -d)\n");
     printf("\t  -x all information\n");
     printf("\n");
     printf("\tOther options:\n");
@@ -169,7 +170,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:acdx")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:acdvx")) != EOF)
     {
         switch (c)
         {
@@ -193,11 +194,16 @@ int main(int argc, char *argv[])
             case 't':
                 opt_t = atoi(optarg);
                 break;
+            case 'v':
+                opt_d = 1;
+                opt_v = 1;
+                break;
             case 'x':
                 opt_x = 1;
                 opt_a = 1;
                 opt_c = 1;
                 opt_d = 1;
+                opt_v = 1;
                 break;
         }
     }
@@ -276,94 +282,98 @@ int main(int argc, char *argv[])
                 bd_info.titles[i].clips[j].duration.tv_sec  = get_seconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
                 bd_info.titles[i].clips[j].duration.tv_usec = get_usceconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
 
-                bd_info.titles[i].clips[j].video_streams = calloc(bd_info.titles[i].clips[j].video_count, sizeof(*bd_info.titles[i].clips[j].video_streams));
                 bd_info.titles[i].clips[j].subtitle_streams = calloc(bd_info.titles[i].clips[j].pg_count, sizeof(*bd_info.titles[i].clips[j].subtitle_streams));
 
-                for (int k=0; k < bd_info.titles[i].clips[j].video_count; k++)
+                if (opt_v == 1)
                 {
-                    switch (title_info->clips[j].video_streams[k].coding_type)
-                    {
-                        case BLURAY_STREAM_TYPE_VIDEO_MPEG1:
-                            bd_info.titles[i].clips[j].video_streams[k].format = video_type[0];
-                            break;
-                        case BLURAY_STREAM_TYPE_VIDEO_MPEG2:
-                            bd_info.titles[i].clips[j].video_streams[k].format = video_type[1];
-                            break;
-                        case BLURAY_STREAM_TYPE_VIDEO_VC1:
-                            bd_info.titles[i].clips[j].video_streams[k].format = video_type[2];
-                            break;
-                        case BLURAY_STREAM_TYPE_VIDEO_H264:
-                            bd_info.titles[i].clips[j].video_streams[k].format = video_type[3];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].video_streams[k].format = video_type[4];
-                            break;
-                    }
+                    bd_info.titles[i].clips[j].video_streams = calloc(bd_info.titles[i].clips[j].video_count, sizeof(*bd_info.titles[i].clips[j].video_streams));
 
-                    switch (title_info->clips[j].video_streams[k].aspect)
+                    for (int k=0; k < bd_info.titles[i].clips[j].video_count; k++)
                     {
-                        case BLURAY_ASPECT_RATIO_4_3:
-                            bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[0];
-                            break;
-                        case BLURAY_ASPECT_RATIO_16_9:
-                            bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[1];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[2];
-                            break;
-                    }
+                        switch (title_info->clips[j].video_streams[k].coding_type)
+                        {
+                            case BLURAY_STREAM_TYPE_VIDEO_MPEG1:
+                                bd_info.titles[i].clips[j].video_streams[k].format = video_type[0];
+                                break;
+                            case BLURAY_STREAM_TYPE_VIDEO_MPEG2:
+                                bd_info.titles[i].clips[j].video_streams[k].format = video_type[1];
+                                break;
+                            case BLURAY_STREAM_TYPE_VIDEO_VC1:
+                                bd_info.titles[i].clips[j].video_streams[k].format = video_type[2];
+                                break;
+                            case BLURAY_STREAM_TYPE_VIDEO_H264:
+                                bd_info.titles[i].clips[j].video_streams[k].format = video_type[3];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].video_streams[k].format = video_type[4];
+                                break;
+                        }
 
-                    switch (title_info->clips[j].video_streams[k].format)
-                    {
-                        case BLURAY_VIDEO_FORMAT_480I:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[0];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_480P:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[1];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_576I:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[2];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_576P:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[3];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_720P:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[4];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_1080I:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[5];
-                            break;
-                        case BLURAY_VIDEO_FORMAT_1080P:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[6];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[7];
-                            break;
-                    }
+                        switch (title_info->clips[j].video_streams[k].aspect)
+                        {
+                            case BLURAY_ASPECT_RATIO_4_3:
+                                bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[0];
+                                break;
+                            case BLURAY_ASPECT_RATIO_16_9:
+                                bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[1];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].video_streams[k].aspect_ratio = aspect_ratio[2];
+                                break;
+                        }
 
-                    switch (title_info->clips[j].video_streams[k].rate)
-                    {
-                        case BLURAY_VIDEO_RATE_24000_1001:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[0];
-                            break;
-                        case BLURAY_VIDEO_RATE_24:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[1];
-                            break;
-                        case BLURAY_VIDEO_RATE_25:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[2];
-                            break;
-                        case BLURAY_VIDEO_RATE_30000_1001:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[3];
-                            break;
-                        case BLURAY_VIDEO_RATE_50:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[4];
-                            break;
-                        case BLURAY_VIDEO_RATE_60000_1001:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[5];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[6];
-                            break;
+                        switch (title_info->clips[j].video_streams[k].format)
+                        {
+                            case BLURAY_VIDEO_FORMAT_480I:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[0];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_480P:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[1];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_576I:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[2];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_576P:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[3];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_720P:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[4];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_1080I:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[5];
+                                break;
+                            case BLURAY_VIDEO_FORMAT_1080P:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[6];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].video_streams[k].resolution = resolution[7];
+                                break;
+                        }
+
+                        switch (title_info->clips[j].video_streams[k].rate)
+                        {
+                            case BLURAY_VIDEO_RATE_24000_1001:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[0];
+                                break;
+                            case BLURAY_VIDEO_RATE_24:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[1];
+                                break;
+                            case BLURAY_VIDEO_RATE_25:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[2];
+                                break;
+                            case BLURAY_VIDEO_RATE_30000_1001:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[3];
+                                break;
+                            case BLURAY_VIDEO_RATE_50:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[4];
+                                break;
+                            case BLURAY_VIDEO_RATE_60000_1001:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[5];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].video_streams[k].fps = video_rate[6];
+                                break;
+                        }
                     }
                 }
 
