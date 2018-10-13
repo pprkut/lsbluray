@@ -23,3 +23,5 @@ set(lsbluray_SRCS
 
 add_executable(lsbluray ${lsbluray_SRCS})
 target_link_libraries(lsbluray ${BLURAY_LIBRARIES})
+
+install(TARGETS lsbluray DESTINATION bin)
