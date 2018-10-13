@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_c = 0, opt_d = 0, opt_t = 0, opt_x = 0;
+int opt_a = 0, opt_c = 0, opt_d = 0, opt_t = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -127,6 +127,7 @@ static void usage(void)
     printf("Usage: %s [options] [-t track_number] [bluray path] \n", program_name);
     printf("\n");
     printf("Options:\n");
+    printf("\t  -a audio streams (implies -d)\n");
     printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
     printf("\t  -x all information\n");
@@ -168,7 +169,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:dcx")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:acdx")) != EOF)
     {
         switch (c)
         {
@@ -179,6 +180,10 @@ int main(int argc, char *argv[])
             case 'V':
                 version();
                 return 0;
+            case 'a':
+                opt_d = 1;
+                opt_a = 1;
+                break;
             case 'c':
                 opt_c = 1;
                 break;
@@ -190,6 +195,7 @@ int main(int argc, char *argv[])
                 break;
             case 'x':
                 opt_x = 1;
+                opt_a = 1;
                 opt_c = 1;
                 opt_d = 1;
                 break;
@@ -271,7 +277,6 @@ int main(int argc, char *argv[])
                 bd_info.titles[i].clips[j].duration.tv_usec = get_usceconds(title_info->clips[j].out_time - title_info->clips[j].in_time);
 
                 bd_info.titles[i].clips[j].video_streams = calloc(bd_info.titles[i].clips[j].video_count, sizeof(*bd_info.titles[i].clips[j].video_streams));
-                bd_info.titles[i].clips[j].audio_streams = calloc(bd_info.titles[i].clips[j].audio_count, sizeof(*bd_info.titles[i].clips[j].audio_streams));
                 bd_info.titles[i].clips[j].subtitle_streams = calloc(bd_info.titles[i].clips[j].pg_count, sizeof(*bd_info.titles[i].clips[j].subtitle_streams));
 
                 for (int k=0; k < bd_info.titles[i].clips[j].video_count; k++)
@@ -362,75 +367,80 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                for (int k=0; k < bd_info.titles[i].clips[j].audio_count; k++)
+                if (opt_a == 1)
                 {
-                    bd_info.titles[i].clips[j].audio_streams[k].language_code = strdup((char *) title_info->clips[j].audio_streams[k].lang);
-                    bd_info.titles[i].clips[j].audio_streams[k].language_name = get_language_name(bd_info.titles[i].clips[j].audio_streams[k].language_code);
+                    bd_info.titles[i].clips[j].audio_streams = calloc(bd_info.titles[i].clips[j].audio_count, sizeof(*bd_info.titles[i].clips[j].audio_streams));
 
-                    switch (title_info->clips[j].audio_streams[k].coding_type)
+                    for (int k=0; k < bd_info.titles[i].clips[j].audio_count; k++)
                     {
-                        case BLURAY_STREAM_TYPE_AUDIO_MPEG1:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[0];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_MPEG2:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[1];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_LPCM:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[2];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_AC3:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[3];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_DTS:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[4];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_TRUHD:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[5];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_AC3PLUS:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[6];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_DTSHD:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[7];
-                            break;
-                        case BLURAY_STREAM_TYPE_AUDIO_DTSHD_MASTER:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[8];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[9];
-                            break;
-                    }
+                        bd_info.titles[i].clips[j].audio_streams[k].language_code = strdup((char *) title_info->clips[j].audio_streams[k].lang);
+                        bd_info.titles[i].clips[j].audio_streams[k].language_name = get_language_name(bd_info.titles[i].clips[j].audio_streams[k].language_code);
 
-                    switch (title_info->clips[j].audio_streams[k].format)
-                    {
-                        case BLURAY_AUDIO_FORMAT_MONO:
-                            bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[0];
-                            break;
-                        case BLURAY_AUDIO_FORMAT_STEREO:
-                            bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[1];
-                            break;
-                        case BLURAY_AUDIO_FORMAT_MULTI_CHAN:
-                            bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[2];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[3];
-                            break;
-                    }
+                        switch (title_info->clips[j].audio_streams[k].coding_type)
+                        {
+                            case BLURAY_STREAM_TYPE_AUDIO_MPEG1:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[0];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_MPEG2:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[1];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_LPCM:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[2];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_AC3:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[3];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_DTS:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[4];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_TRUHD:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[5];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_AC3PLUS:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[6];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_DTSHD:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[7];
+                                break;
+                            case BLURAY_STREAM_TYPE_AUDIO_DTSHD_MASTER:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[8];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].audio_streams[k].format = audio_type[9];
+                                break;
+                        }
 
-                    switch (title_info->clips[j].audio_streams[k].rate)
-                    {
-                        case BLURAY_AUDIO_RATE_48:
-                            bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[0];
-                            break;
-                        case BLURAY_AUDIO_RATE_96:
-                            bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[1];
-                            break;
-                        case BLURAY_AUDIO_RATE_192:
-                            bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[2];
-                            break;
-                        default:
-                            bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[3];
-                            break;
+                        switch (title_info->clips[j].audio_streams[k].format)
+                        {
+                            case BLURAY_AUDIO_FORMAT_MONO:
+                                bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[0];
+                                break;
+                            case BLURAY_AUDIO_FORMAT_STEREO:
+                                bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[1];
+                                break;
+                            case BLURAY_AUDIO_FORMAT_MULTI_CHAN:
+                                bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[2];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].audio_streams[k].channels = audio_channels[3];
+                                break;
+                        }
+
+                        switch (title_info->clips[j].audio_streams[k].rate)
+                        {
+                            case BLURAY_AUDIO_RATE_48:
+                                bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[0];
+                                break;
+                            case BLURAY_AUDIO_RATE_96:
+                                bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[1];
+                                break;
+                            case BLURAY_AUDIO_RATE_192:
+                                bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[2];
+                                break;
+                            default:
+                                bd_info.titles[i].clips[j].audio_streams[k].samplerate = audio_samplerate[3];
+                                break;
+                        }
                     }
                 }
 
