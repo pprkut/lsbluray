@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_a = 0, opt_c = 0, opt_d = 0, opt_s = 0, opt_t = 0, opt_v = 0, opt_x = 0;
+int opt_a = 0, opt_c = 0, opt_D = 0, opt_d = 0, opt_s = 0, opt_t = 0, opt_v = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -124,7 +124,7 @@ static void version(void)
 static void usage(void)
 {
     version();
-    printf("Usage: %s [options] [-t track_number] [bluray path] \n", program_name);
+    printf("Usage: %s [options] [-t track_number] [-D clip_number] [bluray path] \n", program_name);
     printf("\n");
     printf("Options:\n");
     printf("\t  -a audio streams (implies -d)\n");
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
     program_name = argv[0];
 
-    while ((c = getopt(argc, argv, "hV?t:acdsvx")) != EOF)
+    while ((c = getopt(argc, argv, "hV?t:D:acdsvx")) != EOF)
     {
         switch (c)
         {
@@ -188,6 +188,9 @@ int main(int argc, char *argv[])
                 break;
             case 'c':
                 opt_c = 1;
+                break;
+            case 'D':
+                opt_D = atoi(optarg);
                 break;
             case 'd':
                 opt_d = 1;
@@ -278,6 +281,11 @@ int main(int argc, char *argv[])
 
             for (int j=0; j < bd_info.titles[i].clip_count; j++)
             {
+                if (opt_D != j+1 && opt_D != 0)
+                {
+                    continue;
+                }
+
                 bd_info.titles[i].clips[j].video_count     = title_info->clips[j].video_stream_count;
                 bd_info.titles[i].clips[j].audio_count     = title_info->clips[j].audio_stream_count;
                 bd_info.titles[i].clips[j].pg_count        = title_info->clips[j].pg_stream_count;

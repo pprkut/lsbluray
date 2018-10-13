@@ -97,6 +97,11 @@ void print_human_readable(struct bd_info *bd_info)
         {
             for (int j=0; j < bd_info->titles[i].clip_count; j++)
             {
+                if (opt_D != j+1 && opt_D != 0)
+                {
+                    continue;
+                }
+
                 length.hours   = bd_info->titles[i].clips[j].duration.tv_sec / 60 / 60;
                 length.minutes = bd_info->titles[i].clips[j].duration.tv_sec / 60 % 60;
                 length.seconds = bd_info->titles[i].clips[j].duration.tv_sec % 60;

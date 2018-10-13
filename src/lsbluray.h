@@ -16,7 +16,7 @@
 
 extern char *program_name;
 
-extern int opt_a, opt_c, opt_d, opt_s, opt_t, opt_v, opt_x;
+extern int opt_a, opt_c, opt_D, opt_d, opt_s, opt_t, opt_v, opt_x;
 
 struct bd_info {
     const BLURAY_DISC_INFO *generic;
