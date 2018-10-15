@@ -24,16 +24,19 @@ void print_human_readable(struct bd_info *bd_info)
 {
     if (bd_info->generic->disc_id[0] == 0)
     {
-        printf("Disc Title: Unknown");
+        printf("Disc ID: Unknown");
     }
     else
     {
-        printf("Disc Title: %s", bd_info->generic->disc_id);
+        printf("Disc ID: ");
+        for (int i = 0; i < sizeof(bd_info->generic->disc_id); i++) {
+            printf("%02X", bd_info->generic->disc_id[i]);
+        }
     }
 
     if (bd_info->generic->aacs_detected == 1)
     {
-        printf(", AACS: MKVv%i", bd_info->generic->aacs_mkbv);
+        printf(", AACS: MKBv%i", bd_info->generic->aacs_mkbv);
     }
     else
     {
