@@ -114,7 +114,7 @@ const char *audio_channels[4] = {"Mono", "Stereo", "Multi-Channel", "Unknown"};
 
 char* program_name;
 
-int opt_a = 0, opt_c = 0, opt_D = 0, opt_d = 0, opt_s = 0, opt_t = 0, opt_v = 0, opt_x = 0;
+int opt_a = 0, opt_c = 0, opt_D = 0, opt_d = 0, opt_m = 1, opt_s = 0, opt_t = 0, opt_v = 0, opt_x = 0;
 
 static void version(void)
 {
@@ -130,6 +130,7 @@ static void usage(void)
     printf("\t  -a audio streams (implies -d)\n");
     printf("\t  -c chapters\n");
     printf("\t  -d clips\n");
+    printf("\t  -m marks\n");
     printf("\t  -s subtitle streams (implies -d)\n");
     printf("\t  -v video streams (implies -d)\n");
     printf("\t  -x all information\n");
@@ -195,6 +196,9 @@ int main(int argc, char *argv[])
             case 'd':
                 opt_d = 1;
                 break;
+            case 'm':
+                opt_m = 1;
+                break;
             case 's':
                 opt_d = 1;
                 opt_s = 1;
@@ -211,6 +215,7 @@ int main(int argc, char *argv[])
                 opt_a = 1;
                 opt_c = 1;
                 opt_d = 1;
+                opt_m = 1;
                 opt_s = 1;
                 opt_v = 1;
                 break;
@@ -248,7 +253,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    bd_info.title_count = bd_get_titles(bd, 0, 0);
+    bd_info.title_count = bd_get_titles(bd, TITLES_ALL, 0);
 
     if ( opt_t > bd_info.title_count || opt_t < 0)
     {
@@ -489,6 +494,19 @@ int main(int argc, char *argv[])
                 bd_info.titles[i].chapters[j].duration.tv_usec = get_usceconds(title_info->chapters[j].duration);
 
                 bd_info.titles[i].chapters[j].clip = title_info->chapters[j].clip_ref;
+            }
+        }
+
+        if (opt_m== 1)
+        {
+            bd_info.titles[i].marks = calloc(bd_info.titles[i].mark_count, sizeof(*bd_info.titles[i].marks));
+
+            for (int j=0; j < bd_info.titles[i].mark_count; j++)
+            {
+                bd_info.titles[i].marks[j].start.tv_sec  = get_seconds(title_info->marks[j].start);
+                bd_info.titles[i].marks[j].start.tv_usec = get_usceconds(title_info->marks[j].start);
+
+                bd_info.titles[i].marks[j].clip = title_info->marks[j].clip_ref;
             }
         }
 

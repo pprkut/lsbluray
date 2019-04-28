@@ -96,6 +96,23 @@ void print_human_readable(struct bd_info *bd_info)
             }
         }
 
+        if (bd_info->titles[i].marks)
+        {
+            for (int j=0; j < bd_info->titles[i].mark_count; j++)
+            {
+                length.hours   = bd_info->titles[i].marks[j].start.tv_sec / 60 / 60;
+                length.minutes = bd_info->titles[i].marks[j].start.tv_sec / 60 % 60;
+                length.seconds = bd_info->titles[i].marks[j].start.tv_sec % 60;
+                length.microseconds = bd_info->titles[i].marks[j].start.tv_usec;
+
+                snprintf(usec, 7, "%06lu", bd_info->titles[i].marks[j].start.tv_usec);
+
+                printf("\tMark: %02i", j+1);
+                printf(", Start: %02i:%02i:%02i.%.3s", length.hours, length.minutes, length.seconds, usec);
+                printf(", Clip: %02i\n", bd_info->titles[i].marks[j].clip + 1);
+            }
+        }
+
         if (bd_info->titles[i].clips)
         {
             for (int j=0; j < bd_info->titles[i].clip_count; j++)
